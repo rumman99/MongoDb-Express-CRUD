@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MongoDB</title>
+</head>
+<body>
+    <h3>This is Mongo DB</h3>
+    <form action="/productAdd" method="post">
+        <input type="text" name="title" placeholder="Product Name">
+        <input type="text" name="brand" placeholder="Brand Name">
+        <input type="number" name="quantity" placeholder="Quantity">
+        <input type="number" name="price" placeholder="Product Price">
+        <input type="submit" name="" id="" value="Add Product">
+    </form>
+    <div id="product_body">
+
+    </div>
+
+
+    <script>
+        const fetching=(()=>{
+            fetch('/product')
+            .then(result => result.json())
+            .then(data => {
+                // console.log(data);
+                const item= document.getElementById('product_body');
+                data.map(element => {
+                const tag= document.createElement('h3');
+                tag.innerHTML= `<span style="color:red">Product:</span> ${element.title}</br> <span style="color:red">Price:</span> ${element.price}</br> <span style="color:red">Quantity:</span> ${element.quantity}</br> <span style="color:red">Brand:</span>${element.brand} <button onclick='handleDelete("${element._id}")' >X</button>`;
+                item.appendChild(tag);
+                })
+            })   
+        })();
+    
+        const handleDelete=(product_id)=>{
+            const fetching=(async()=>{
+                const result= await fetch('/remove/'+product_id, {method: 'delete'})
+                const data= await result.json();
+            })()
+            window.location.reload();
+        }
+    </script>
+</body>
+</html>
