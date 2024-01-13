@@ -15,24 +15,44 @@
         <input type="submit" name="" id="" value="Add Product">
     </form>
     <div id="product_body">
-
+    </div>
+    <div id="editProductUi">
     </div>
 
 
     <script>
-        const fetching=(()=>{
+        const fetchProductUi=(()=>{
             fetch('/product')
             .then(result => result.json())
             .then(data => {
                 // console.log(data);
                 const item= document.getElementById('product_body');
-                data.map(element => {
+                data.forEach(element => {
                 const tag= document.createElement('h3');
-                tag.innerHTML= `<span style="color:red">Product:</span> ${element.title}</br> <span style="color:red">Price:</span> ${element.price}</br> <span style="color:red">Quantity:</span> ${element.quantity}</br> <span style="color:red">Brand:</span>${element.brand} <button onclick='handleDelete("${element._id}")' >X</button>`;
+                tag.innerHTML= `<span style="color:red">Product:</span> ${element.title}</br> <span style="color:red">Price:</span> ${element.price}</br> <span style="color:red">Quantity:</span> ${element.quantity}</br> <span style="color:red">Brand:</span>${element.brand} <button onclick='handleDelete("${element._id}")'>X</button> <button onclick="fetchProductForEditUi('${element._id}')" >Edit</button>`;
                 item.appendChild(tag);
                 })
             })   
         })();
+
+
+        const fetchProductForEditUi= async (product_id)=>{
+            const result= await fetch('/product/'+product_id);
+            const data= await result.json();
+            // console.log(data);
+            const editableItem= document.getElementById('editProductUi');
+            const tag= document.createElement('h1');
+            editableItem.innerText='';
+            tag.innerHTML= `<input type='number' value=${data.price} id='newPrice'></input> <input type='number' value=${data.quantity} id='newQuantity'></input> <button onclick='handleEdit("${data._id}")'>Submit</button>`
+            editableItem.appendChild(tag);
+        }
+        
+        const handleEdit= async (product_id)=>{
+            const price= document.getElementById('newPrice').value;
+            const quantity= document.getElementById('newQuantity').value;
+            const fetching= await fetch(`/edit/${product_id}`, {method: 'PATCH', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({price, quantity})});
+            const data= await fetching.json();
+        }
     
         const handleDelete=(product_id)=>{
             const fetching=(async()=>{

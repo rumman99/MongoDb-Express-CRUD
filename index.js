@@ -38,16 +38,23 @@ app.listen(3333, console.log('Listening to Port 3333'))
         await client.db("organicdb").command({ ping: 1 });
         const database = client.db("organicdb"); //Database Name
 
+        //Api for Read Product on UI //
             app.get('/product', async(req, res)=>{
                 const data = await database.collection('products').find({}).toArray();
                 res.send(data);
                 })
 
+        // Api for Read Editing product //
+            app.get('/product/:product_id', async (req, res)=>{
+                console.log(req.params.product_id)
+                const data= await database.collection('products').find({_id: new ObjectId(req.params.product_id)}).toArray();
+                res.send(data[0])
+            });
 
             ////POST///
             app.post('/productAdd', (req, res)=>{
                 database.collection('products').insertOne(req.body, console.log('Added To DataBase :)'))
-                res.send('Added Successfully')
+                res.redirect('/')
             });
 
         // await database.collection('products').insertOne({ // Reference the "people" collection in the specified database
@@ -63,6 +70,14 @@ app.listen(3333, console.log('Listening to Port 3333'))
                 database.collection('products').deleteOne({_id: new ObjectId(req.params.product_id)})
                 .then(result => console.log(result))
             });
+
+        // Update Specific value Price and Quantity //
+            app.patch(`/edit/:product_id`, async (req, res)=>{
+                const findProductFromDb= await database.collection('products').updateOne({_id: new ObjectId(req.params.product_id)}, 
+                    {
+                    $set:{price: req.body.price, quantity: req.body.quantity}
+                    })
+            })
 
         console.log("You successfully connected to MongoDB!");
         } finally {
