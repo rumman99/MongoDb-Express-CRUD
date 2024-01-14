@@ -14,6 +14,7 @@
         <input type="number" name="price" placeholder="Product Price">
         <input type="submit" name="" id="" value="Add Product">
     </form>
+    <h1 style="color:green; text-decoration: underline">Products:</h1>
     <div id="product_body">
     </div>
     <div id="editProductUi">
@@ -21,20 +22,21 @@
 
 
     <script>
-        const fetchProductUi=(()=>{
+        const fetchProductUi=()=>{
             fetch('/product')
             .then(result => result.json())
             .then(data => {
                 // console.log(data);
+                document.getElementById('product_body').innerText='';
                 const item= document.getElementById('product_body');
                 data.forEach(element => {
                 const tag= document.createElement('h3');
-                tag.innerHTML= `<span style="color:red">Product:</span> ${element.title}</br> <span style="color:red">Price:</span> ${element.price}</br> <span style="color:red">Quantity:</span> ${element.quantity}</br> <span style="color:red">Brand:</span>${element.brand} <button onclick='handleDelete("${element._id}")'>X</button> <button onclick="fetchProductForEditUi('${element._id}')" >Edit</button>`;
+                tag.innerHTML= `<span style="color:red">Product:</span> ${element.title}</br> <span style="color:red">Brand:</span>${element.brand}</br> <span style="color:red">Quantity:</span> ${element.quantity} </br> <span style="color:red">Price:</span> ${element.price} </br> <button onclick='handleDelete(event, "${element._id}")'>X</button> <button onclick="fetchProductForEditUi('${element._id}')" >Edit</button>`;
                 item.appendChild(tag);
-                })
-            })   
-        })();
-
+                });
+            });  
+        };
+        fetchProductUi();
 
         const fetchProductForEditUi= async (product_id)=>{
             const result= await fetch('/product/'+product_id);
@@ -43,23 +45,32 @@
             const editableItem= document.getElementById('editProductUi');
             const tag= document.createElement('h1');
             editableItem.innerText='';
-            tag.innerHTML= `<input type='number' value=${data.price} id='newPrice'></input> <input type='number' value=${data.quantity} id='newQuantity'></input> <button onclick='handleEdit("${data._id}")'>Submit</button>`
+            tag.innerHTML= `<input id='newTitle' value=${data.title}> <input id='newBrand' value=${data.brand}></input> <input type='number' value=${data.quantity} id='newQuantity'></input> </input> <input type='number' value=${data.price} id='newPrice'></input> <button onclick='handleEdit("${data._id}")'>Submit</button>`
             editableItem.appendChild(tag);
         }
         
         const handleEdit= async (product_id)=>{
+            const title= document.getElementById('newTitle').value;
+            const brand= document.getElementById('newBrand').value;
             const price= document.getElementById('newPrice').value;
             const quantity= document.getElementById('newQuantity').value;
-            const fetching= await fetch(`/edit/${product_id}`, {method: 'PATCH', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({price, quantity})});
+            const fetching= await fetch(`/edit/${product_id}`, {method: 'PATCH', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({title, brand, price, quantity})});
             const data= await fetching.json();
+            if(data){
+                fetchProductUi();
+                document.getElementById('editProductUi').innerHTML='';
+            }
         }
     
-        const handleDelete=(product_id)=>{
+        const handleDelete=(event, product_id)=>{
             const fetching=(async()=>{
                 const result= await fetch('/remove/'+product_id, {method: 'delete'})
                 const data= await result.json();
+                if(data){
+                event.target.parentNode.style.display='none';
+            }
             })()
-            window.location.reload();
+            // window.location.reload();
         }
     </script>
 </body>

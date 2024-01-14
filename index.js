@@ -46,7 +46,7 @@ app.listen(3333, console.log('Listening to Port 3333'))
 
         // Api for Read Editing product //
             app.get('/product/:product_id', async (req, res)=>{
-                console.log(req.params.product_id)
+                // console.log(req.params.product_id);
                 const data= await database.collection('products').find({_id: new ObjectId(req.params.product_id)}).toArray();
                 res.send(data[0])
             });
@@ -66,17 +66,21 @@ app.listen(3333, console.log('Listening to Port 3333'))
         // .then(result => console.log('Product Added'))
 
             app.delete('/remove/:product_id', (req, res)=>{
-                console.log(req.params.product_id)
                 database.collection('products').deleteOne({_id: new ObjectId(req.params.product_id)})
-                .then(result => console.log(result))
+                .then(result => {if(result.deletedCount === 1)
+                    res.send(true)
+                })
             });
 
         // Update Specific value Price and Quantity //
             app.patch(`/edit/:product_id`, async (req, res)=>{
                 const findProductFromDb= await database.collection('products').updateOne({_id: new ObjectId(req.params.product_id)}, 
                     {
-                    $set:{price: req.body.price, quantity: req.body.quantity}
+                    $set:{title: req.body.title, brand: req.body.brand, price: req.body.price, quantity: req.body.quantity}
                     })
+                if(findProductFromDb.modifiedCount===1){
+                    res.send(true);
+                }
             })
 
         console.log("You successfully connected to MongoDB!");
